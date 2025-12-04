@@ -1,0 +1,75 @@
+use std::fs;
+
+//                         2
+fn is_invalid(val: i64, split_by: u32) -> bool {
+    let len : u32 = val.to_string().len().try_into().unwrap();
+
+    // can't split. not divisible
+    if len % split_by != 0 {
+	return false;
+    }
+
+    // num places we're splitting by
+    let split_len: u32 = len / split_by;
+
+    // amt we're popping
+    let amt : i64 = 10i64.pow(split_len);
+
+    let mut cur: i64 = val;
+    let mut prev: i64 = cur % amt;
+
+    let ret = false;
+    
+    for _ in 1..split_by {
+	cur /= amt;
+	if prev == (cur % amt) {
+	    //println!("{val} - Found splitting by {split_by}, Cur - {cur}, splitlen {amt}");
+	    //ret = true;
+	} else {
+	    return false;
+	}
+
+	prev = cur % amt;
+    }
+    return true;
+}
+
+fn main() {
+    let file_path = "input.txt";
+    let contents = fs::read_to_string(file_path).expect("Should have been able to read");
+    //print!("{contents}");
+
+    let mut invalid_ids : Vec<i64> = Vec::new();
+    
+    let splitter = contents.split(',');
+    for l in splitter {
+	let line = l.trim_end();
+	//println!("{line}:");
+
+	let mut rnge = line.split('-');
+	
+	let from: i64 = rnge.next().expect("Value").trim_end().parse().unwrap();
+	let to : i64 = rnge.next().expect("Value").trim_end().parse().unwrap();
+
+	assert_eq!(rnge.next(), None);
+	//println!("Going from {from} to {to}");
+	
+	for n in from..to+1 {
+	    let len : u32 = n.to_string().len().try_into().unwrap();
+
+	    if is_invalid(n, 2) || is_invalid(n, 3) || is_invalid(n, 5) || is_invalid(n, 7) {
+		invalid_ids.push(n);
+	    }
+	    continue;
+	}
+    }
+
+    let mut total : i64 = 0;
+    
+    for invalid_id in invalid_ids.iter() {
+	//println!("{invalid_id}");
+	total += invalid_id;
+    }
+
+    println!("The total is {total}");
+}
